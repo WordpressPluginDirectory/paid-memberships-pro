@@ -29,6 +29,10 @@ jQuery(document).ready(function(){
         jQuery('#other_discount_code_button').click(function() {
             var code = jQuery('#pmpro_other_discount_code').val();
             var level_id = jQuery('#pmpro_level').val();
+            if ( ! level_id ) {
+                // If the level ID is not set, try to get it from the #level field for outdated checkout templates.
+                level_id = jQuery('#level').val();
+            }
 
             if(code)
             {
@@ -130,7 +134,7 @@ jQuery(document).ready(function(){
     }
 	
 	// Find ALL <form> tags on your page
-	jQuery('form').submit(function(){
+	jQuery('form#pmpro_form').submit(function(){
 		// On submit disable its submit button
 		jQuery('input[type=submit]', this).attr('disabled', 'disabled');
 		jQuery('input[type=image]', this).attr('disabled', 'disabled');
@@ -217,7 +221,7 @@ jQuery(document).ready(function(){
 	}
 });
 
-// Get non-sensitve checkout form data to be sent to checkout_levels endpoint.
+// Get non-sensitive checkout form data to be sent to checkout_levels endpoint.
 function pmpro_getCheckoutFormDataForCheckoutLevels() {
 	// We need the level, discount code, and any field with the pmpro_alter_price CSS class.
 	const checkoutFormData = jQuery( "#level, #pmpro_level, #discount_code, #pmpro_form .pmpro_alter_price" ).serializeArray();

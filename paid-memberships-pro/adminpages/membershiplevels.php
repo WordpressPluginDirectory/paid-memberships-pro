@@ -156,7 +156,8 @@
 
 						data = {
 							action: 'pmpro_update_level_group_order',
-							level_group_order: level_group_order
+							level_group_order: level_group_order,
+							nonce: '<?php echo esc_attr( wp_create_nonce( 'pmpro_update_level_group_order' ) ); ?>'
 						};
 
 						$.post(ajaxurl, data, function(response) {
@@ -274,7 +275,7 @@
 							$pmpro_membershiplevels_page_action_link['url'] = esc_url( $pmpro_membershiplevels_page_action_link['url'] );
 						}
 						?>
-						<a class="<?php echo esc_attr( $class ); ?>" href="<?php echo esc_url( $pmpro_membershiplevels_page_action_link['url'] ); ?>"><?php echo esc_html( $pmpro_membershiplevels_page_action_link['name'] ); ?></a>
+						<a class="<?php echo esc_attr( $class ); ?>" href="<?php echo $pmpro_membershiplevels_page_action_link['url']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>"><?php echo esc_html( $pmpro_membershiplevels_page_action_link['name'] ); ?></a>
 						<?php
 					}
 				?>

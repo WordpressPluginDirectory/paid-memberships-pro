@@ -13,8 +13,8 @@
 	--pmpro--color--almost-black: #0F172A;
 	--pmpro--color--info-background: #d9edf7;
 	--pmpro--color--info-border: #bce8f1;
-	--pmpro--color--info-text: #31708f;
-	--pmpro--color--info-link: #245269;
+	--pmpro--color--info-text: #2a5f7a;
+	--pmpro--color--info-link: #1f4659;
 	--pmpro--color--success-background: #d4edda;
 	--pmpro--color--success-border: #c3e6cb;
 	--pmpro--color--success-text: #0F441C;
@@ -352,6 +352,12 @@ body[class*="memberships_page_pmpro-"] {
 	margin: var(--pmpro--spacing--small) 0;
 }
 
+.pmpro_admin ul,
+.pmpro_admin ol {
+	font-size: 14px;
+	line-height: 1.5;
+}
+
 .pmpro_admin small {
 	font-size: 13px;
 }
@@ -423,6 +429,7 @@ body[class*="memberships_page_pmpro-"] {
 	.pmpro_admin .pmpro-nav-primary ul {
 		border-bottom: none;
 		justify-content: center;
+		padding-left: 0;
 	}
 
 	.pmpro_admin .pmpro-nav-primary ul li a {
@@ -537,6 +544,16 @@ body[class*="memberships_page_pmpro-"] {
 
 .pmpro_tag-alert.pmpro_tag-has_icon:before {
 	content: "\f16d";
+}
+
+.pmpro_tag-info {
+	background-color: var(--pmpro--color--info-background);
+	border-color: var(--pmpro--color--info-border);
+	color: var(--pmpro--color--info-text);
+}
+
+.pmpro_tag-info.pmpro_tag-has_icon:before {
+	content: "\f111";
 }
 
 
@@ -1513,6 +1530,42 @@ table.pmprommpu_levels tr.remove_level td {background: #F2DEDE; }
 	#membership-level-list-form+p {
 		margin-top: var(--pmpro--spacing--medium);
 	}
+}
+
+/**
+ * Page Settings
+ */
+#pmpro-custom-page-template-settings table {
+	margin-top: var(--pmpro--spacing--medium);
+}
+
+#pmpro-custom-page-template-settings table tr td {
+	vertical-align: middle;
+}
+
+#pmpro-custom-page-template-settings table tr.pmpro_template-active-pmpro td:nth-child(2),
+#pmpro-custom-page-template-settings table tr.pmpro_template-active-custom td:nth-child(3) {
+	background-color: var(--pmpro--color--info-background);
+}
+
+#pmpro-custom-page-template-settings table tr.pmpro_template-active-error td:nth-child(3) {
+	background-color: var(--pmpro--color--error-background);
+}
+
+#pmpro-custom-page-template-settings table tr td code {
+	font-size: 85%;
+	white-space: nowrap;
+}
+
+#pmpro-custom-page-template-settings table tr td:not(:last-of-type) .pmpro_tag {
+	background-color: transparent;
+	border: none;
+	margin: 0 0 0 calc( var(--pmpro--spacing--small) / 3 );
+	padding: 0;
+}
+
+#pmpro-custom-page-template-settings table tr td:last-of-type .pmpro_tag {
+	margin: 0;
 }
 
 /**
@@ -3232,8 +3285,11 @@ button.pmpro_report_th_closed:before {
 }
 
 @media only screen and (max-width: 782px) {
+	.pmpro_banner {
+		margin-left: -30px;
+	}
 	.wrap.pmpro_admin {
-		margin-right: var(--pmpro--spacing--small);
+		margin-right: calc( var(--pmpro--spacing--small) * 2 );
 		margin-left: var(--pmpro--spacing--small);
 	}
 
@@ -3244,6 +3300,13 @@ button.pmpro_report_th_closed:before {
 
 	.wrap.pmpro_admin form .page-title-action {
 		top: 0;
+	}
+
+	.wrap.pmpro_admin .add-new-h2,
+	.wrap.pmpro_admin .add-new-h2:active,
+	.wrap.pmpro_admin .page-title-action,
+	.wrap.pmpro_admin .page-title-action:active {
+		padding: calc( var(--pmpro--spacing--small) / 4 ) var(--pmpro--spacing--small);
 	}
 
 	.wrap.pmpro_admin .tablenav.top {
@@ -3265,6 +3328,31 @@ button.pmpro_report_th_closed:before {
 		display: table-cell;
 		overflow: hidden;
 		word-wrap: break-word;
+	}
+
+	.wrap.pmpro_admin .row-actions {
+		align-items: center;
+		color: #a7aaad;
+		gap: 0;
+		margin: 0 -4px;
+	}
+
+	.wrap.pmpro_admin .row-actions span .button-link,
+	.wrap.pmpro_admin .row-actions span a {
+		padding-right: 4px;
+		padding-left: 4px;
+	}
+
+	.wrap.pmpro_admin .form-table td input[type=email],
+	.wrap.pmpro_admin .form-table td input[type=password],
+	.wrap.pmpro_admin .form-table td input[type=text],
+	.wrap.pmpro_admin .form-table td select {
+		display: inline-block;
+		width: auto;
+	}
+
+	.pmpro_admin-pmpro-member input[type=text]:not(.pmpro_admin-pmpro-member tr#date_field_tr input[type=text]), .pmpro_admin-pmpro-member input[type=email] {
+		min-width: auto;
 	}
 
 	#pmpro_dashboard_report_recent_members .wp-list-table .column-username img {
@@ -3304,6 +3392,19 @@ button.pmpro_report_th_closed:before {
 	.pmpro_admin-pmpro-membershiplevels .membership-levels tr td:first-child:before {
 		content: '';
 		width: 0;
+	}
+
+	.pmpro_admin #pmpro-page-settings select {
+		margin-bottom: var(--pmpro--spacing--small);
+	}
+
+	.pmpro_admin-pmpro-member .pmpro-level_change-action {
+		flex-direction: column;
+	}
+
+	.pmpro_admin-pmpro-reports #dashboard-widgets .meta-box-sortables {
+		margin-left: 0;
+		margin-right: 0;
 	}
 }
 

@@ -104,7 +104,7 @@ function pmpro_setOption( $s, $v = null, $sanitize_function = 'sanitize_text_fie
 
 	if ( is_array( $v ) ) {
 		$v = implode( ',', $v );
-	} else {
+	} elseif ( is_string( $v ) ) {
 		$v = trim( $v );
 	}
 
@@ -664,7 +664,7 @@ function pmpro_get_membership_expiration_text( $level, $user ) {
 	}
 
 	// Apply legacy filter pmpro_account_membership_expiration_text.
-	if ( is_admin() && has_filter( 'pmpro_account_membership_expiration_text' ) ) {
+	if ( ! is_admin() && has_filter( 'pmpro_account_membership_expiration_text' ) ) {
 		/**
 		 * Legacy filter for showing the expiration date on the frontend.
 		 *
@@ -786,7 +786,7 @@ function pmpro_next_payment( $user_id = null, $order_status = 'success', $format
 
 	if ( $user_id ) {
 		// Convert passed order status to a subscription status.
-		$subscription_status = $order_status === 'success' ? 'active' : 'cancelled';
+		$subscription_status = ( $order_status === 'success' || ( is_array( $order_status ) && in_array( 'success', $order_status ) ) ) ? 'active' : 'cancelled';
 		$subscriptions = PMPro_Subscription::get_subscriptions_for_user( $user_id, null, $subscription_status );
 		if ( ! empty( $subscriptions ) ) {
 			return $subscriptions[0]->get_next_payment_date( $format );
@@ -1196,7 +1196,18 @@ function pmpro_changeMembershipLevel( $level, $user_id = null, $old_level_status
 	// Cancel all membership levels for this user in the same level group if only one level per group is allowed.
 	$level_group_id = pmpro_get_group_id_for_level( $level_id );
 	$level_group = pmpro_get_level_group( $level_group_id );
-	if ( ! empty( $level_group) && empty( $level_group->allow_multiple_selections ) ) {
+
+	/**
+	 * Filter whether old levels should be deactivated or not.
+	 * Typically you'll want to hook into pmpro_before_change_membership_level
+	 * or pmpro_after_change_membership_level later to run your own deactivation logic.
+	 *
+	 * @since  1.8.11
+	 * @var $pmpro_deactivate_old_levels bool True or false if levels should be deactivated. Defaults to true.
+	 */
+	$pmpro_deactivate_old_levels = apply_filters( 'pmpro_deactivate_old_levels', true );
+
+	if ( ! empty( $level_group) && empty( $level_group->allow_multiple_selections ) && $pmpro_deactivate_old_levels ) {
 		// Get all levels in the group.
 		$levels_in_group = pmpro_get_levels_for_group( $level_group->id );
 		$group_level_ids = wp_list_pluck( $levels_in_group, 'id' );
@@ -1208,7 +1219,7 @@ function pmpro_changeMembershipLevel( $level, $user_id = null, $old_level_status
 		foreach ( $levels_to_cancel as $level_to_cancel ) {
 			pmpro_cancelMembershipLevel( $level_to_cancel, $user_id, 'changed' );
 		}
-	} else {
+	} elseif ( $pmpro_deactivate_old_levels ) {
 		// If the user already has this membership level, we still want to cancel it.
 		if ( in_array( $level_id, $membership_ids ) ) {
 			pmpro_cancelMembershipLevel( $level_id, $user_id, 'changed' );
@@ -1364,7 +1375,7 @@ function pmpro_clear_level_cache_for_user( $user_id ) {
 function pmpro_do_action_after_all_membership_level_changes( $filter_contents = null ) {
 	global $pmpro_old_user_levels;
 	if ( empty( $pmpro_old_user_levels ) ) {
-		// No level changes occured, return.
+		// No level changes occurred, return.
 		return $filter_contents;
 	}
 
@@ -1373,7 +1384,7 @@ function pmpro_do_action_after_all_membership_level_changes( $filter_contents = 
 	$pmpro_old_user_levels = null;
 
 	/**
-	 * Run code after all membership level changes have occured. Users who have had changes
+	 * Run code after all membership level changes have occurred. Users who have had changes
 	 * will be stored in the global $pmpro_old_user_levels array.
 	 *
 	 * @since  2.6
@@ -1978,6 +1989,10 @@ function pmpro_checkDiscountCode( $code, $level_id = null, $return_errors = fals
 }
 
 function pmpro_no_quotes( $s, $quotes = array( "'", '"' ) ) {
+	if ( empty( $s ) ) {
+		$s = '';
+	}
+
 	return str_replace( $quotes, '', $s );
 }
 
@@ -2230,7 +2245,7 @@ function pmpro_getMembershipLevelsForUser( $user_id = null, $include_inactive = 
 
 			if ( 'no' === $admin_membership_access ) {
 				return array();
-			} elseif ( 'current' !== $admin_membership_access ) {
+			} elseif ( 'yes' === $admin_membership_access ) {
 				$all_levels = pmpro_getAllLevels( true );
 
 				// Make sure that each level has all the necessary fields.
@@ -3092,7 +3107,10 @@ function pmpro_show_setup_wizard_link() {
 		$show = false;
 	}
 
-	return $show;
+	/**
+	 * Filter to determine if the Setup Wizard link should show. Allows you to bypass whether or not to show the link.
+	 */
+	return apply_filters( 'pmpro_show_setup_wizard_link', $show );
 }
 
 /**
@@ -4119,7 +4137,7 @@ function pmpro_kses( $original_string, $context = 'email' ) {
 }
 
 /**
- * Replace last occurence of a string.
+ * Replace last occurrence of a string.
  * From: http://stackoverflow.com/a/3835653/1154321
  * @since 2.6
  */
@@ -4219,7 +4237,7 @@ function pmpro_kses_allowed_html( $allowed_html, $context ) {
 add_filter( 'wp_kses_allowed_html', 'pmpro_kses_allowed_html', 10, 2 );
 
 /**
- * Show deprecation warning if calling function was called publically.
+ * Show deprecation warning if calling function was called publicly.
  *
  * Useful for preparing to change method visibility from public to private.
  *
@@ -4239,7 +4257,7 @@ function pmpro_method_should_be_private( $deprecated_notice_version ) {
 }
 
 /**
- * Send a 200 HTTP reponse without ending PHP execution.
+ * Send a 200 HTTP response without ending PHP execution.
  *
  * Useful to avoid issues like timeouts from gateways during
  * webhook/IPN handlers.
@@ -4460,7 +4478,7 @@ function pmpro_refund_order( $order ){
 /**
  * Returns an array of order statuses that do not qualify for a refund
  * 
- * @return array Returns an array of statuses that are not allowe to be refunded
+ * @return array Returns an array of statuses that are not allowed to be refunded
  */
 function pmpro_disallowed_refund_statuses() {
 
@@ -4652,7 +4670,7 @@ function pmpro_set_expiration_date( $user_id, $level_id, $enddate ) {
 /*
  * Check whether a file should be allowed to be uploaded.
  *
- * By default, only files assiciated with a user field can be uploaded,
+ * By default, only files associated with a user field can be uploaded,
  * but there is a filter to allow other files to be uploaded as well.
  *
  * @since 2.12.4
