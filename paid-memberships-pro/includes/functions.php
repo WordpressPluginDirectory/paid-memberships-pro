@@ -3645,9 +3645,15 @@ function pmpro_generatePages( $pages ) {
 			);
 
 			// make some pages a subpage of account
-			$top_level_pages = array( 'account', 'login' );
-			if ( ! in_array( $name, $top_level_pages ) ) {
+			$post_parent_account_pages = array( 'billing', 'cancel', 'invoice', 'member_profile_edit' );
+			if ( in_array( $name, $post_parent_account_pages ) ) {
 				$insert['post_parent'] = $pmpro_pages['account'];
+			}
+
+			// make some pages a subpage of checkout
+			$post_parent_checkout_pages = array( 'confirmation' );
+			if ( in_array( $name, $post_parent_checkout_pages ) ) {
+				$insert['post_parent'] = $pmpro_pages['checkout'];
 			}
 
 			// tweak the login slug
@@ -3805,7 +3811,7 @@ function pmpro_cleanup_memberships_users_table() {
  * @return bool True if we are on the checkout page, false otherwise
  */
 function pmpro_is_checkout() {
-	global $pmpro_pages;
+	global $pmpro_pages, $wp_query;
 
 	// Try is_page first.
 	if ( ! empty( $pmpro_pages['checkout'] ) ) {
@@ -3815,7 +3821,11 @@ function pmpro_is_checkout() {
 	}
 
 	// Page might not be setup yet or a custom page.
-	$queried_object = get_queried_object();
+	if ( ! empty( $wp_query ) ) {
+		$queried_object = get_queried_object();
+	} else {
+		$queried_object = null;
+	}
 
 	if ( ! $is_checkout &&
 		! empty( $queried_object ) &&
